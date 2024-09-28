@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(16, 40px);
+            grid-template-rows: repeat(16, 40px);
+            gap: 1px;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: white;
+            border: 1px solid #ccc;
+        }
+        .black {
+            background-color: black;
+        }
+        .flash {
+            animation: flash 0.5s infinite alternate;
+        }
+        @keyframes flash {
+            from {
+                background-color: black;
+            }
+            to {
+                background-color: grey;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grid" id="grid"></div>
+
+    <script>
+        const gridSize = 16;
+        let selectedCell = null;
+        let flashing = false;
+
+        const gridElement = document.getElementById('grid');
+
+        // Create a 16x16 grid of divs
+        for (let i = 0; i < gridSize * gridSize; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.addEventListener('click', () => handleClick(cell));
+            gridElement.appendChild(cell);
+        }
+
+        // Pick a random cell to start as black
+        let blackCell = gridElement.children[Math.floor(Math.random() * gridSize * gridSize)];
+        blackCell.classList.add('black');
+
+        function handleClick(cell) {
+            // If the clicked cell is black, toggle flashing on/off
+            if (cell === blackCell) {
+                if (flashing) {
+                    blackCell.classList.remove('flash');
+                    flashing = false;
+                } else {
+                    blackCell.classList.add('flash');
+                    flashing = true;
+                }
+            } 
+            // If clicking an empty square and blackCell is flashing
+            else if (flashing) {
+                blackCell.classList.remove('black', 'flash');
+                flashing = false;
+                blackCell = cell;
+                blackCell.classList.add('black');
+            }
+        }
+    </script>
+</body>
+</html>
