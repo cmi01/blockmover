@@ -28,16 +28,11 @@
         .black {
             background-color: black;
         }
-        .flash {
-            animation: flash 0.5s infinite alternate;
+        .red {
+            background-color: red;
         }
-        @keyframes flash {
-            from {
-                background-color: black;
-            }
-            to {
-                background-color: grey;
-            }
+        .selected {
+            outline: 3px solid blue;
         }
     </style>
 </head>
@@ -47,39 +42,64 @@
     <script>
         const gridSize = 16;
         let selectedCell = null;
-        let flashing = false;
 
         const gridElement = document.getElementById('grid');
-
+        
         // Create a 16x16 grid of divs
         for (let i = 0; i < gridSize * gridSize; i++) {
             const cell = document.createElement('div');
             cell.classList.add('cell');
+            cell.setAttribute('selected', 'false');
+            cell.setAttribute('content', 'empty');
             cell.addEventListener('click', () => handleClick(cell));
             gridElement.appendChild(cell);
         }
 
-        // Pick a random cell to start as black
-        let blackCell = gridElement.children[Math.floor(Math.random() * gridSize * gridSize)];
-        blackCell.classList.add('black');
+        // Helper function to get random empty cells
+        function getRandomEmptyCell() {
+            let emptyCells = Array.from(gridElement.children).filter(cell => cell.getAttribute('content') === 'empty');
+            return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+
+        // Add 2 random red squares
+        for (let i = 0; i < 2; i++) {
+            const redCell = getRandomEmptyCell();
+            redCell.classList.add('red');
+            redCell.setAttribute('content', 'red');
+        }
+
+        // Add 2 random black squares
+        for (let i = 0; i < 2; i++) {
+            const blackCell = getRandomEmptyCell();
+            blackCell.classList.add('black');
+            blackCell.setAttribute('content', 'black');
+        }
 
         function handleClick(cell) {
-            // If the clicked cell is black, toggle flashing on/off
-            if (cell === blackCell) {
-                if (flashing) {
-                    blackCell.classList.remove('flash');
-                    flashing = false;
-                } else {
-                    blackCell.classList.add('flash');
-                    flashing = true;
-                }
-            } 
-            // If clicking an empty square and blackCell is flashing
-            else if (flashing) {
-                blackCell.classList.remove('black', 'flash');
-                flashing = false;
-                blackCell = cell;
-                blackCell.classList.add('black');
+            const isEmpty = cell.getAttribute('content') === 'empty';
+            
+            if (selectedCell) {
+                selectedCell.setAttribute('selected', 'false');
+                selectedCell.classList.remove('selected');
+            }
+
+            if (cell === selectedCell) {
+                selectedCell = null; // Deselect if clicked again
+            } else if (cell.getAttribute('content') !== 'empty') {
+                // Select occupied squares only
+                cell.setAttribute('selected', 'true');
+                cell.classList.add('selected');
+                selectedCell = cell;
+            } else if (isEmpty && selectedCell) {
+                // Move the selected black or red square to an empty square
+                const content = selectedCell.getAttribute('content');
+                selectedCell.classList.remove('black', 'red', 'selected');
+                selectedCell.setAttribute('content', 'empty');
+                selectedCell.setAttribute('selected', 'false');
+                
+                cell.classList.add(content);
+                cell.setAttribute('content', content);
+                selectedCell = null; // Deselect after move
             }
         }
     </script>
